@@ -2,6 +2,12 @@ require(xlsx)
 require(dplyr)
 require(plyr)
 
+# university coastal = la jolla
+# palomar-julian?
+# mid-city = san diego
+# anza borrego springs
+# laguna pine valley
+# north sd = rancho santa fe
 mood_dis <- read.csv("data/mood_filtered.csv", header=T)
 mood_dis.edit <- filter(mood_dis, YEAR==2010)
 mood_dis.edit <- filter(mood_dis.edit, UrbanicitySort != 99)
