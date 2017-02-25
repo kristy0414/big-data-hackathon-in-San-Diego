@@ -33,8 +33,13 @@ mood_essential$Geography[mood_essential$Geography == "LAGUNA-PINE VALLEY"] <- "P
 mood_essential$Geography[mood_essential$Geography == "NORTH SAN DIEGO"] <- "RANCHO SANTA FE"
 sd <- data.frame(mood_essential[sapply("SAN DIEGO", grepl, mood_essential$Geography),])
 sd <- rbind(sd, mood_essential[mood_essential$Geography == "MID-CITY",])
-mood_essential <- rbind.fill(mood_essential, data.frame(Geography="SAN DIEGO", Age_Adjusted_Rate=mean(sd$Age_Adjusted_Rate)))
+san_diego_main <- sd[sd$Geography=="SAN DIEGO",]
+sd <- sd[!sd$Geography=="SAN DIEGO",]
+mood_essential <- rbind.fill(mood_essential, data.frame(Geography="SAN DIEGO", Age_Adjusted_Rate=mean(sd$Age_Adjusted_Rate),
+                                                                               Parks=mean(sd$Parks),
+                                                                               Poverty=mean(sd$Poverty),
+                                                                               UnemploymentRate=mean(sd$UnemploymentRate)))
 
 moodx <- aggregate(mood_essential, list(mood_essential$Geography), min, na.rm=T, na.action="NA")
 moodx$Geography <- moodx$Group.1
-write.csv(moodx[-1], "mood_disorder_pred")
+write.csv(moodx[-1], "data_analysis/mood_disorder_pred.csv")
