@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <meta charset="UTF-8" />
+	 <meta name="viewport" content="width=device-width, initial-scale=1" />
+	 <title>
+	     Vaccine Exemption Map
+	 </title>
+	 <!--Leaflet-->
+
+	 <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+	 <script src="lib/leaflet/leaflet.js"></script>
+	 
+	 <script src="data/vaccine_exemption_by_county.geojson"></script>
+     <link rel="stylesheet" href="dist/MarkerCluster.css" />
+	 <link rel="stylesheet" href="dist/MarkerCluster.Default.css" />
+	 
+	 
+	 
+	 
+     
+	 
+	 
+	 <style type="text/css">
+	    #map { width:800px; height:600px; }
+	 </style>
+   </head>
+   <body>
+     <h1>Vaccine Exemption Map</h1>
+	 <div id="map"></div>
+	 <script>
+	   //Get PME layer
+	   function getPMEColor(popEst){
+	      if(popEst>0.3){return '#900C3F';}
+		  else if(popEst>0.2){return '#C70039';}
+		  else if(popEst>0.1){return '#FF5733';}
+		  else if(popEst>0.05){return '#FFC300';}
+		  else {return '#DAF7A6';}
+	   }
+	   function PMEStyle(feature){
+	       return{
+		      fillColor:getPMEColor(feature.properties.Avg_PME),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var PME_layer;
+	   	function resetPMEHighlight(e) {
+		  PME_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function PMEonEachFeature(feature, layer) {
+		var popupContent = "County Name: "+feature.properties.NAMELSAD+"<br>PME Rate: "+feature.properties.Avg_PME;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetPMEHighlight, click: zoomToFeature})
+	    }
+		
+	   //Get PBE layer
+	   function getPBEColor(popEst){
+	      if(popEst>8){return '#900C3F';}
+		  else if(popEst>5){return '#C70039';}
+		  else if(popEst>3){return '#FF5733';}
+		  else if(popEst>1){return '#FFC300';}
+		  else {return '#DAF7A6';}
+	   }
+	   function PBEStyle(feature){
+	       return{
+		      fillColor:getPBEColor(feature.properties.Avg_PBE),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var PBE_layer;
+	   	function resetPBEHighlight(e) {
+		  PBE_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function PBEonEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAMELSAD+"<br>PBE Rate: "+feature.properties.Avg_PBE;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetPBEHighlight, click: zoomToFeature})
+	    }
+
+	   //Get HPBE layer
+	   function getHPBEColor(popEst){
+	      if(popEst>5){return '#900C3F';}
+		  else if(popEst>3){return '#C70039';}
+		  else if(popEst>2){return '#FF5733';}
+		  else if(popEst>1){return '#FFC300';}
+		  else {return '#DAF7A6';}
+	   }
+	   function HPBEStyle(feature){
+	       return{
+		      fillColor:getHPBEColor(feature.properties.Avg_HEALTH),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var HPBE_layer;
+	   	function resetHPBEHighlight(e) {
+		  HPBE_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function HPBEonEachFeature(feature, layer) {
+		var popupContent = "Name: "+feature.properties.NAMELSAD+"<br>HPBE Rate: "+feature.properties.Avg_HEALTH;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetHPBEHighlight, click: zoomToFeature})
+	    }
+
+	   //Get RPBE layer
+	   function getRPBEColor(popEst){
+	      if(popEst>1.2){return '#900C3F';}
+		  else if(popEst>0.7){return '#C70039';}
+		  else if(popEst>0.4){return '#FF5733';}
+		  else if(popEst>0.2){return '#FFC300';}
+		  else {return '#DAF7A6';}
+	   }
+	   function RPBEStyle(feature){
+	       return{
+		      fillColor:getRPBEColor(feature.properties.Avg_RELIGI),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var RPBE_layer;
+	   	function resetRPBEHighlight(e) {
+		  RPBE_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function RPBEonEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAMELSAD+"<br>RPBE Rate: "+feature.properties.Avg_RELIGI;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetRPBEHighlight, click: zoomToFeature})
+	    }		
+		
+	   //Get Conditional Layer
+	   function getCondiColor(popEst){
+	      if(popEst>6){return '#900C3F';}
+		  else if(popEst>4){return '#C70039';}
+		  else if(popEst>2.5){return '#FF5733';}
+		  else if(popEst>1){return '#FFC300';}
+		  else {return '#DAF7A6';}
+	   }
+	   function CondiStyle(feature){
+	       return{
+		      fillColor:getCondiColor(feature.properties.Avg_CONDIT),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var Condi_layer;
+	   	function resetCondiHighlight(e) {
+		  Condi_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function CondionEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAMELSAD+"<br>Conditional Rate: "+feature.properties.Avg_CONDIT;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetCondiHighlight, click: zoomToFeature})
+	    }	
+
+	 
+
+	   
+	   //public functions
+	   	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+		
+
+		//info.update(layer.feature.properties);
+	    }
+
+	   function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	   }
+	   
+	   
+       var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				maxZoom: 15,
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}),
+			latlng = new L.LatLng(37.378912, -120.276185);
+			
+	   var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		   mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+
+	   var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+		   streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+
+	   var map = new L.Map('map', {center: latlng, zoom: 6, layers: [tiles]});
+	   
+	   var PME_layer=L.geoJson(vaccine_exemption,{style:PMEStyle,onEachFeature:PMEonEachFeature}).addTo(map);
+       var PBE_layer=L.geoJson(vaccine_exemption,{style:PBEStyle,onEachFeature:PBEonEachFeature});
+	   var HPBE_layer=L.geoJson(vaccine_exemption,{style:HPBEStyle,onEachFeature:HPBEonEachFeature});
+	   var RPBE_layer=L.geoJson(vaccine_exemption,{style:RPBEStyle,onEachFeature:RPBEonEachFeature});
+	   var Condi_layer=L.geoJson(vaccine_exemption,{style:CondiStyle,onEachFeature:CondionEachFeature});
+	   
+
+	   var baseLayers = {
+		"Grayscale": grayscale,
+		"Streets": streets,
+		"OpenStreetMap":tiles
+	   };
+
+	   var vaccine_exemption_type = {
+		"Personal Medical Exemption": PME_layer,
+		"Personal Belief Exemption": PBE_layer,
+		"Health Practioned PBE": HPBE_layer,
+		"Religious PBE":RPBE_layer,
+		"Conditional":Condi_layer
+	   };
+
+
+	   map.addLayer(grayscale)
+	   L.control.layers(baseLayers).addTo(map);
+	   L.control.layers(vaccine_exemption_type).addTo(map);
+	   
+	   //add legend
+	   var PMElegend=L.control({position:'bottomright'});
+	   PMElegend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 0.3",
+			 "> 0.2",
+			 "> 0.1",
+			 "> 0.05",
+			 "<= 0.05"
+		  ];
+		  var grades = [0.3,0.2,0.1,0.05,0.05];
+		  div.innerHTML='<div><b>Vaccine Exemption Legend</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getPMEColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var PBElegend=L.control({position:'bottomright'});
+	   PBElegend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 8",
+			 "> 5",
+			 "> 3",
+			 "> 1",
+			 "<= 1"
+		  ];
+		  var grades = [8.0,5.0,3.0,1.0,1.0];
+		  div.innerHTML='<div><b>Vaccine Exemption Legend</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getPBEColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var HPBElegend=L.control({position:'bottomright'});
+	   HPBElegend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 5",
+			 "> 3",
+			 "> 2",
+			 "> 1",
+			 "<= 1"
+		  ];
+		  var grades = [5.0,3.0,2.0,1.0,1.0];
+		  div.innerHTML='<div><b>Vaccine Exemption Legend</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getHPBEColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var RPBElegend=L.control({position:'bottomright'});
+	   RPBElegend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 1.2",
+			 "> 0.7",
+			 "> 0.4",
+			 "> 0.2",
+			 "<= 0.2"
+		  ];
+		  var grades = [1.2,0.7,0.4,0.2,0.2];
+		  div.innerHTML='<div><b>Vaccine Exemption Legend</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getRPBEColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var Condilegend=L.control({position:'bottomright'});
+	   Condilegend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 6",
+			 "> 4",
+			 "> 2.5",
+			 "> 1",
+			 "<= 1"
+		  ];
+		  var grades = [6.0,4.0,2.5,1.0,1.0];
+		  div.innerHTML='<div><b>Vaccine Exemption Legend</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getCondiColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }	   
+	   
+	   PMElegend.addTo(map);
+	   currentLegend=PMElegend;
+	   
+	   map.on('baselayerchange',function(eventLayer){
+	     if(eventLayer.name==='Personal Medical Exemption'){
+		    map.removeControl(currentLegend)
+			currentLegend=PMElegend;
+			PMElegend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Personal Belief Exemption'){
+		    map.removeControl(currentLegend);
+			currentLegend=PBElegend;
+			PBElegend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Health Practioned PBE'){
+		    map.removeControl(currentLegend);
+			currentLegend=HPBElegend;
+			HPBElegend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Religious PBE'){
+		    map.removeControl(currentLegend);
+			currentLegend=RPBElegend;
+			RPBElegend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Conditional'){
+		    map.removeControl(currentLegend);
+			currentLegend=Condilegend;
+			Condilegend.addTo(map);
+		 }
+	   }
+	   )
+	   
+	   
+	   
+       
+	   
+	   
+	 </script>
+   </body>
+</html>
