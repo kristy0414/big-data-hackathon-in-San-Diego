@@ -24,12 +24,12 @@ sd <- rbind(sd, mood_dis.edit[mood_dis.edit$Geography == "Mid-City",])
 mood_dis.edit <- rbind.fill(mood_dis.edit, data.frame(Geography="San Diego", Age_Adjusted_Rate=mean(sd$Age_Adjusted_Rate)))
 #write.csv(mood_dis.edit, "js/data/mood_disorders.csv")
 
-parks <- read.xlsx("data/HCI_Crime_752_PL_CO_RE_CA_2000-2013_21OCT15.xlsx", 1)
-parks <- parks[parks$race_eth_code == 9 & parks$geotype == "PL" & !is.na(parks$rate) & parks$county_name=="San Diego",]
+parks <- read.xlsx("data/ozone_zcta_place_co_region_ca4-14-13.xlsx", 1)
+parks <- parks[parks$race_eth_code == 9 & parks$geotype == "PL" & !is.na(parks$O3_unhealthy_days) & parks$county_name=="San Diego",]
 parks$Geography <- gsub("\\s*\\w*$", "", parks$geoname)
 #write.csv(parks, "js/data/parks_filtered.csv")
 final <- merge(parks, mood_dis.edit, by="Geography")
 
-fit <- cor(final$Age_Adjusted_Rate, final$rate)
+fit <- cor(final$Age_Adjusted_Rate, final$O3_unhealthy_days)
 fit
-write.csv(final, "data_analysis/mood_crime.csv")
+#write.csv(final, "data_analysis/mood_crime.csv")
