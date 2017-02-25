@@ -32,4 +32,4 @@ final <- merge(parks, mood_dis.edit, by="Geography")
 
 fit <- cor(final$Age_Adjusted_Rate, final$O3_unhealthy_days)
 fit
-#write.csv(final, "data_analysis/mood_crime.csv")
+write.csv(final, "data_analysis/mood_ozone.csv")

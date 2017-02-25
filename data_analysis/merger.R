@@ -1,34 +1,40 @@
-require(openxlsx)
-require(dplyr)
-require(plyr)
+mood <- read.csv("data_analysis/mood_crime.csv")
+essential <- c("Geography", "Age_Adjusted_Rate", "rate")
+mood_essential <- mood[,essential]
 
-# university coastal = la jolla
-# palomar-julian?
-# mid-city = san diego
-# anza borrego springs
-# laguna pine valley
-# north sd = rancho santa fe
-mood_dis <- read.csv("data/Mood_Disorders_Hospitalization_2010-2013.csv.csv", header=T)
-mood_dis.edit <- filter(mood_dis, YEAR==2010)
-mood_dis.edit <- filter(mood_dis.edit, UrbanicitySort != 99)
-mood_dis.edit$Geography <- as.character(mood_dis.edit$Geography)
-mood_dis.edit$Geography[mood_dis.edit$Geography == "San Dieguito"] <- "Encinitas"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "Del Mar-Mira Mesa"] <- "Del Mar"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "Palomar-Julian"] <- "Julian"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "University Coastal"] <- "La Jolla"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "Anza-Borrego Springs"] <- "Borrego Springs"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "Laguna-Pine Valley"] <- "Pine Valley"
-mood_dis.edit$Geography[mood_dis.edit$Geography == "North San Diego"] <- "Rancho Santa Fe"
-sd <- data.frame(mood_dis.edit[sapply("San Diego", grepl, mood_dis.edit$Geography),])
-sd <- rbind(sd, mood_dis.edit[mood_dis.edit$Geography == "Mid-City",])
-mood_dis.edit <- rbind.fill(mood_dis.edit, data.frame(Geography="San Diego", Age_Adjusted_Rate=mean(sd$Age_Adjusted_Rate)))
-write.csv(mood_dis.edit, "mood_disorders.csv")
+mood2 <- read.csv("data_analysis/mood_food.csv")
+essential <-  c("Geography", "Age_Adjusted_Rate", "affordability_ratio")
+mood_essential <- merge(mood_essential, mood2[,essential], all=T)
 
-parks <- read.xlsx("data/ParkBeachOpen10_output4-12-13.xlsx", 1)
-parks <- parks[]
-parks$Geography <- gsub("\\s*\\w*$", "", parks$geoname)
+mood3 <- read.csv("data_analysis/mood_ozone.csv")
+essential <-  c("Geography", "Age_Adjusted_Rate", "O3_unhealthy_days")
+mood_essential <- merge(mood_essential, mood3[,essential], all=T)
 
-#final <- merge(parks, mood_dis, by="Geography")
+mood4 <- read.csv("data_analysis/mood_parks.csv")
+essential <-  c("Geography", "Age_Adjusted_Rate", "Parks")
+mood_essential$Geography <- toupper(mood_essential$Geography)
+mood_essential <- merge(mood_essential, mood4[,essential], all=T)
 
-#fit <- cor(final$Age_Adjusted_Rate, final$p_parkacc)
-#fit
+mood5 <- read.csv("data_analysis/mood_poverty.csv")
+essential <- c("Geography", "Age_Adjusted_Rate", "Poverty")
+mood_essential <- merge(mood_essential, mood5[,essential], all=T)
+
+mood6 <- read.csv("data_analysis/mood_unemployment.csv")
+essential <- c("Geography", "Age_Adjusted_Rate", "UnemploymentRate")
+mood_essential <- merge(mood_essential, mood6[,essential], all=T)
+
+mood_essential$Geography <- as.character(mood_essential$Geography)
+mood_essential$Geography[mood_essential$Geography == "SAN DIEGUITO"] <- "ENCINITAS"
+mood_essential$Geography[mood_essential$Geography == "DEL MAR-MIRA MESA"] <- "DEL MAR"
+mood_essential$Geography[mood_essential$Geography == "PALOMAR-JULIAN"] <- "JULIAN"
+mood_essential$Geography[mood_essential$Geography == "UNIVERSITY COASTAL"] <- "LA JOLLA"
+mood_essential$Geography[mood_essential$Geography == "ANZA-BORREGO SPRINGS"] <- "BORREGO SPRINGS"
+mood_essential$Geography[mood_essential$Geography == "LAGUNA-PINE VALLEY"] <- "PINE VALLEY"
+mood_essential$Geography[mood_essential$Geography == "NORTH SAN DIEGO"] <- "RANCHO SANTA FE"
+sd <- data.frame(mood_essential[sapply("SAN DIEGO", grepl, mood_essential$Geography),])
+sd <- rbind(sd, mood_essential[mood_essential$Geography == "MID-CITY",])
+mood_essential <- rbind.fill(mood_essential, data.frame(Geography="SAN DIEGO", Age_Adjusted_Rate=mean(sd$Age_Adjusted_Rate)))
+
+moodx <- aggregate(mood_essential, list(mood_essential$Geography), min, na.rm=T, na.action="NA")
+moodx$Geography <- moodx$Group.1
+write.csv(moodx[-1], "mood_disorder_pred")
