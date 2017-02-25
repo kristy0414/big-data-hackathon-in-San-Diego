@@ -5,6 +5,8 @@ d3.queue()
 
 function analyze(error, mood_disorders, parks_filtered) {
   if(error) { console.log(error); }
+  var csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Region" + "," + "Age Adusted Rate of Mood Disorders" + "," + "Parks per Person" +"\n";
   mood_disorders.forEach(function(mood, i) {
     var result = parks_filtered.filter(function(parks) {
         return parks.Geography === mood.Geography;
@@ -16,15 +18,28 @@ function analyze(error, mood_disorders, parks_filtered) {
  		mood_disorders.splice(i, 1);
  	}
   });
+
+   
+  var names = [];
   var u = [];
   var v = [];
   console.log(mood_disorders);
-  mood_disorders.forEach(function(mood) {
+  mood_disorders.forEach(function(mood, i) {
   	if(mood.Parks !== undefined) {
+  		names.push(mood.Geography);
   		u.push(mood.Age_Adjusted_Rate);
   		v.push(mood.Parks);
+  		dataString = mood.Geography + "," + mood.Age_Adjusted_Rate + "," + mood.Parks;
+ 	csvContent += i < mood_disorders.length ? dataString+ "\n" : dataString;
   	}
+  	
   });
+  var encodedUri = encodeURI(csvContent);
+	var link = document.createElement("a");
+	link.setAttribute("href", encodedUri);
+	link.setAttribute("download", "my_data.csv");
+	document.body.appendChild(link); // Required for FF
+link.click();
   console.log(u);
   console.log(v);
   Array.prototype.mult = function (b) {
@@ -42,7 +57,6 @@ function analyze(error, mood_disorders, parks_filtered) {
     }
     return s;
   };
-
   variance = function(u)
   {
     var n=u.length,alpha = (n/(n-1));
@@ -61,4 +75,5 @@ function analyze(error, mood_disorders, parks_filtered) {
   }
   var parks_mood = corcoef(u,v);
   console.log(parks_mood);
+
 }
