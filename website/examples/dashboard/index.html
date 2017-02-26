@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Mental Health Dashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>
+      Mood Disorder Factor Map
+    </title>
+    <!--Leaflet-->
+
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+    <script src="lib/leaflet/leaflet.js"></script>
+
+    <script src="data/mood_disorder_factor.geojson"></script><link rel="stylesheet" href="dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="dist/MarkerCluster.Default.css" />
+      
+    <style type="text/css">
+       #map { width:800px; height:600px; }
+    </style>
+
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+   <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+  </head>
+
+  <body>
+
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">Mental Health Map San Diego</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="tweet_suicide_map/twitter.html">Social Media Map</a></li>
+              <li><a href="User.html">Profile</a></li>
+              <li><a href="Info.html">Information</a></li>
+              <li><a href="About.html">About</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="#map">Maps <span class="sr-only">(current)</span></a></li>
+            <li><a href="#CorrelationArea">Correlations</a></li>
+          </ul>
+         <!-- <ul class="nav nav-sidebar">
+            <li><a href="https://www.reddit.com/">Nav item</a></li>
+          </ul>
+          <ul class="nav nav-sidebar">
+            <li><a href="">Nav item again</a></li>
+          </ul>-->
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h1 class="page-header">San Diego Mental Health</h1>
+
+          <!-- Map code will go here -->
+     	 <div id="map"></div>
+     	
+     	<script>
+	   //Get food afford layer
+	   function getaffordColor(popEst){
+	      if(popEst>0.4){return '#900C3F';}
+		  else if(popEst>0.3){return '#C70039';}
+		  else if(popEst>0.2){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function afford_Style(feature){
+	       return{
+		      fillColor:getaffordColor(feature.properties.food_affor),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var afford_layer;
+	   	function resetaffordHighlight(e) {
+		  afford_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function afford_onEachFeature(feature, layer) {
+		var popupContent = "Region Name: "+feature.properties.NAME+"<br>Age adjustment rate"+feature.properties.Age_Adjust+"<br>Food Affordability: "+feature.properties.food_affor;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetaffordHighlight, click: zoomToFeature})
+	    }
+		
+	   //Get poverty layer
+	   function getpovertyColor(popEst){
+	      if(popEst>20){return '#900C3F';}
+		  else if(popEst>12){return '#C70039';}
+		  else if(popEst>5){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function poverty_Style(feature){
+	       return{
+		      fillColor:getpovertyColor(feature.properties.Poverty),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var poverty_layer;
+	   	function resetpovertyHighlight(e) {
+		  poverty_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function poverty_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adjust+"<br>Poverty Rate:"+feature.properties.Poverty;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetpovertyHighlight, click: zoomToFeature})
+	    }
+
+	   //Get ozone pollution layer
+	   function getozoneColor(popEst){
+	      if(popEst>6){return '#900C3F';}
+		  else if(popEst>3){return '#C70039';}
+		  else if(popEst>1){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function ozone_Style(feature){
+	       return{
+		      fillColor:getozoneColor(feature.properties.ozone_poll),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var ozone_layer;
+	   	function resetozoneHighlight(e) {
+		  ozone_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function ozone_onEachFeature(feature, layer) {
+		var popupContent = "Name: "+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adjust+"<br>Ozone Pollution: "+feature.properties.ozone_poll;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetozoneHighlight, click: zoomToFeature})
+	    }
+
+	   //Get crime rate
+	   function getcrimeColor(popEst){
+	      if(popEst>4){return '#900C3F';}
+		  else if(popEst>3){return '#C70039';}
+		  else if(popEst>1){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function crime_Style(feature){
+	       return{
+		      fillColor:getcrimeColor(feature.properties.crime_rate),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var crime_layer;
+	   	function resetcrimeHighlight(e) {
+		  crime_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function crime_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Crime Rate: "+feature.properties.crime_rate;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetcrimeHighlight, click: zoomToFeature})
+	    }		
+		
+	   //Get unemployment rate
+	   function getunemployColor(popEst){
+	      if(popEst>9){return '#900C3F';}
+		  else if(popEst>6){return '#C70039';}
+		  else if(popEst>3){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function unemploy_Style(feature){
+	       return{
+		      fillColor:getunemployColor(feature.properties.Unemployme),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var unemploy_layer;
+	   	function resetunemployHighlight(e) {
+		  unemploy_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function unemploy_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Unemployment Rate: "+feature.properties.Unemployme;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetunemployHighlight, click: zoomToFeature})
+	    }		
+		
+	   //Get Park Percentage
+	   function getparkColor(popEst){
+	      if(popEst>0.9){return '#900C3F';}
+		  else if(popEst>0.7){return '#C70039';}
+		  else if(popEst>0.5){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function park_Style(feature){
+	       return{
+		      fillColor:getparkColor(feature.properties.Parks),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var park_layer;
+	   	function resetparkHighlight(e) {
+		  park_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function park_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Park Percentage: "+feature.properties.Parks;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetparkHighlight, click: zoomToFeature})
+	    }		
+		
+		
+		
+	   
+	   //public functions
+	   	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+		
+
+		//info.update(layer.feature.properties);
+	    }
+
+	   function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	   }
+	   
+	   
+       var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				maxZoom: 15,
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}),
+			latlng = new L.LatLng(33.024247, -116.820837);
+			
+	   var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		   mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+
+
+
+	   var map = new L.Map('map', {center: latlng, zoom: 9, layers: [tiles]});
+	   
+	   var afford_layer=L.geoJson(mood_factor,{style:afford_Style,onEachFeature:afford_onEachFeature}).addTo(map);
+       var ozone_layer=L.geoJson(mood_factor,{style:ozone_Style,onEachFeature:ozone_onEachFeature});
+	   var poverty_layer=L.geoJson(mood_factor,{style:poverty_Style,onEachFeature:poverty_onEachFeature});
+	   var crime_layer=L.geoJson(mood_factor,{style:crime_Style,onEachFeature:crime_onEachFeature});
+       var unemploy_layer=L.geoJson(mood_factor,{style:unemploy_Style,onEachFeature:unemploy_onEachFeature});
+	   var park_layer=L.geoJson(mood_factor,{style:park_Style,onEachFeature:park_onEachFeature});
+	   
+
+	   var baseLayers = {
+		"OpenStreetMap":tiles
+	   };
+
+	   var vaccine_exemption_type = {
+		"Food Affordability": afford_layer,
+		"Ozone Pollution": ozone_layer,
+		"Poverty Rate": poverty_layer,
+		"Crime Rate":crime_layer,
+		"Unemployment Rate":unemploy_layer,
+		"Park Percentage":park_layer
+	   };
+
+
+	   map.addLayer(tiles)
+	   
+	   L.control.layers(vaccine_exemption_type).addTo(map);
+	   
+	   //add legend
+	   var afford_legend=L.control({position:'bottomright'});
+	   afford_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 0.4",
+			 "> 0.3",
+			 "> 0.2",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [0.4000001,0.30000001,0.2000001,0.00001,0];
+		  div.innerHTML='<div><b>Food Affordabilty</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getaffordColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var ozone_legend=L.control({position:'bottomright'});
+	   ozone_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 6",
+			 "> 3",
+			 "> 1",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [6.00001,3.00001,1.00001,0.00001,0];
+		  div.innerHTML='<div><b>Ozone pollution</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getozoneColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var poverty_legend=L.control({position:'bottomright'});
+	   poverty_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 20",
+			 "> 12",
+			 "> 5",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [20.00001,12.00001,5.00001,0.00001,0];
+		  div.innerHTML='<div><b>Poverty Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getpovertyColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var crime_legend=L.control({position:'bottomright'});
+	   crime_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 4",
+			 "> 3",
+			 "> 1",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [4.00001,3.00001,1.00001,0.00001,0];
+		  div.innerHTML='<div><b>Crime Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getcrimeColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var unemploy_legend=L.control({position:'bottomright'});
+	   unemploy_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 9",
+			 "> 6",
+			 "> 3",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [9.00001,6.00001,3.00001,0.00001,0];
+		  div.innerHTML='<div><b>Unemployed Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getunemployColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var park_legend=L.control({position:'bottomright'});
+	   park_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 0.9",
+			 "> 0.7",
+			 "> 0.5",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [0.90001,0.70001,0.50001,0.00001,0];
+		  div.innerHTML='<div><b>Park Percentage</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getparkColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   afford_legend.addTo(map);
+	   currentLegend=afford_legend;
+	   
+	   map.on('baselayerchange',function(eventLayer){
+	     if(eventLayer.name==='Food Affordability'){
+		    map.removeControl(currentLegend)
+			currentLegend=afford_legend;
+			afford_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Ozone Pollution'){
+		    map.removeControl(currentLegend);
+			currentLegend=ozone_legend;
+			ozone_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Poverty Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=poverty_legend;
+			poverty_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Crime Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=crime_legend;
+			crime_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Unemployment Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=unemploy_legend;
+			unemploy_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Park Percentage'){
+		    map.removeControl(currentLegend);
+			currentLegend=park_legend;
+			park_legend.addTo(map);
+		 }
+	   }
+	   )
+	   
+	   </script>
+	   
+
+          <h2 class="sub-header" > Correlation by Areas</h2>
+          <a name="CorrelationArea"></a>
+          <div class="dropdown">
+              <button onclick="myFunction()" class="dropbtn">Correlation Rates</button>
+              <div id="myDropdown" class="dropdown-content">
+                <a href="#">ADD</a>
+                <a href="#">Alcohol</a>
+                <a href="#">Substances</a>
+                <a href="#">Mood Disorders</a>
+              </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Geography</th>
+                  <th>Age Adjustment Rate</th>
+                  <th>Crime Rate</th>
+                  <th>Affordability Ratio</th>
+                  <th>Ozone Pollution</th>
+                    <th>Parks</th>
+                    <th>Poverty</th>
+                    <th>Unemployment Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+<td>ALPINE</td>
+<td>418.2597</td>
+<td> </td>
+<td>0.1354659</td>
+<td>8.973331</td>
+<td>0.4880812</td>
+<td>23.1</td>
+<td>7.6</td>
+</tr>
+<tr>
+<td>BORREGO SPRINGS</td>
+<td>589.8888</td>
+<td> </td>
+<td>0.2115382</td>
+<td>7.666667</td>
+<td>0.4155405</td>
+<td>10.725</td>
+<td>6.5</td>
+</tr>
+<tr>
+<td>CARLSBAD</td>
+<td>229.0676</td>
+<td>1.85136</td>
+<td>0.1581696</td>
+<td>0.8415871</td>
+<td>0.7909705</td>
+<td>14.45577</td>
+<td>7.206667</td>
+</tr>
+<tr>
+<td>CENTRAL SAN DIEGO</td>
+<td>629.4986</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9597096</td>
+<td>15.69034</td>
+<td>7.213158</td>
+</tr>
+<tr>
+<td>CHULA VISTA</td>
+<td>409.6521</td>
+<td>2.718149</td>
+<td>0.2601171</td>
+<td>0.6106763</td>
+<td>0.8636326</td>
+<td>12.7875</td>
+<td>11.0619</td>
+</tr>
+<tr>
+<td>COASTAL</td>
+<td>270.1208</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9889041</td>
+<td>14.98947</td>
+<td>6.536364</td>
+</tr>
+<tr>
+<td>CORODO</td>
+<td>165.6314</td>
+<td>1.321912</td>
+<td>0.1314223</td>
+<td>0.333333</td>
+<td>0.8686591</td>
+<td>7.72963</td>
+<td>5.6875</td>
+</tr>
+<tr>
+<td>DEL MAR</td>
+<td>188.2112</td>
+<td>4.56621</td>
+<td> </td>
+<td>1.333333</td>
+<td>0.9688408</td>
+<td>9.471154</td>
+<td>6.121429</td>
+</tr>
+<tr>
+<td>EL CAJON</td>
+<td>339.8093</td>
+<td>3.890307</td>
+<td>0.2836972</td>
+<td>3.909652</td>
+<td>0.4545348</td>
+<td>10.33966</td>
+<td>9.086667</td>
+</tr>
+<tr>
+<td>ELLIOTT-VAJO</td>
+<td>296.2186</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9445849</td>
+<td>10.4375</td>
+<td>6.63</td>
+</tr>
+<tr>
+<td>ENCINITAS</td>
+<td>273.3047</td>
+<td>2.453039</td>
+<td>0.1146617</td>
+<td>0.7834831</td>
+<td>0.8169152</td>
+<td>7.486842</td>
+<td>6.43</td>
+</tr>
+<tr>
+<td>ESCONDIDO</td>
+<td>301.1529</td>
+<td>4.148397</td>
+<td>0.2522808</td>
+<td>4.909988</td>
+<td>0.5305281</td>
+<td>15.17561</td>
+<td>8.227273</td>
+</tr>
+<tr>
+<td>FALLBROOK</td>
+<td>271.31</td>
+<td> </td>
+<td>0.1946485</td>
+<td>3.666667</td>
+<td>0.356184</td>
+<td>4.420833</td>
+<td>9.866667</td>
+</tr>
+<tr>
+<td>JAMUL</td>
+<td>231.0581</td>
+<td> </td>
+<td>0.3104389</td>
+<td>1.674833</td>
+<td>0.8763547</td>
+<td>8.825</td>
+<td>9.35</td>
+</tr>
+<tr>
+<td>JULIAN</td>
+<td>156.5905</td>
+<td> </td>
+<td> </td>
+<td>8</td>
+<td>0.7180451</td>
+<td>7.725</td>
+<td>15.3</td>
+</tr>
+<tr>
+<td>KEARNY MESA</td>
+<td>382.3494</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9382833</td>
+<td>5.524324</td>
+<td>7.842105</td>
+</tr>
+<tr>
+<td>LA MESA</td>
+<td>563.5471</td>
+<td>3.224393</td>
+<td>0.1781332</td>
+<td>1.333742</td>
+<td>0.7668242</td>
+<td>12.86176</td>
+<td>8.26</td>
+</tr>
+<tr>
+<td>LAKESIDE</td>
+<td>316.3327</td>
+<td> </td>
+<td>0.1747095</td>
+<td>7.66234</td>
+<td>0.2952222</td>
+<td>5.895</td>
+<td>9.7</td>
+</tr>
+<tr>
+<td>LEMON GROVE</td>
+<td>383.3816</td>
+<td>6.161137</td>
+<td>0.2374255</td>
+<td>0.666667</td>
+<td>0.9055409</td>
+<td>35.36</td>
+<td>8.16</td>
+</tr>
+<tr>
+<td>MID-CITY</td>
+<td>379.653</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9372091</td>
+<td>23.78333</td>
+<td>8.424138</td>
+</tr>
+<tr>
+<td>MOUNTAIN EMPIRE</td>
+<td>192.0968</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.534326</td>
+<td>5.475</td>
+<td>7</td>
+</tr>
+<tr>
+<td>TIOL CITY</td>
+<td>267.1334</td>
+<td>7.305998</td>
+<td>0.3789775</td>
+<td>0.666667</td>
+<td>0.7552189</td>
+<td>12.18125</td>
+<td>10.59231</td>
+</tr>
+<tr>
+<td>OCEANSIDE</td>
+<td>343.2025</td>
+<td>3.890212</td>
+<td>0.2113671</td>
+<td>0.7560696</td>
+<td>0.8812159</td>
+<td>13.05256</td>
+<td>9.545</td>
+</tr>
+<tr>
+<td>PENINSULA</td>
+<td>261.0363</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.8526118</td>
+<td>17.20732</td>
+<td>6.316667</td>
+</tr>
+<tr>
+<td>PINE VALLEY</td>
+<td>110.1408</td>
+<td> </td>
+<td> </td>
+<td>5.333333</td>
+<td>0.9701867</td>
+<td>6.6</td>
+<td>7.3</td>
+</tr>
+<tr>
+<td>POWAY</td>
+<td>266.6892</td>
+<td>1.882412</td>
+<td>0.1432137</td>
+<td>4.333668</td>
+<td>0.8896552</td>
+<td>18.102</td>
+<td>5.315385</td>
+</tr>
+<tr>
+<td>RAMO</td>
+<td>383.5182</td>
+<td> </td>
+<td>0.4157266</td>
+<td>9</td>
+<td>0.5189991</td>
+<td>17.7</td>
+<td>6.05</td>
+</tr>
+<tr>
+<td>RANCHO SANTA FE</td>
+<td>246.7867</td>
+<td> </td>
+<td> </td>
+<td>1</td>
+<td>0.7896568</td>
+<td>22.12381</td>
+<td>6.141667</td>
+</tr>
+<tr>
+<td>SAN DIEGO</td>
+<td>436.194</td>
+<td>4.295542</td>
+<td>0.2409714</td>
+<td>0.871102</td>
+<td> </td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td>SAN MARCOS</td>
+<td>249.0686</td>
+<td>2.828804</td>
+<td>0.2354847</td>
+<td>1.848705</td>
+<td>0.6799457</td>
+<td>7.846875</td>
+<td>7.944444</td>
+</tr>
+<tr>
+<td>SANTEE</td>
+<td>452.9503</td>
+<td>2.864471</td>
+<td>0.1948009</td>
+<td>3</td>
+<td>0.8262462</td>
+<td>13.36875</td>
+<td>7.075</td>
+</tr>
+<tr>
+<td>SOUTH BAY</td>
+<td>217.3456</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9555042</td>
+<td>13.54318</td>
+<td>9.763636</td>
+</tr>
+<tr>
+<td>SOUTHEASTERN SAN DIEGO</td>
+<td>299.4305</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9647352</td>
+<td>10.26053</td>
+<td>9.884211</td>
+</tr>
+<tr>
+<td>SPRING VALLEY</td>
+<td>330.6043</td>
+<td> </td>
+<td>0.2014751</td>
+<td>1.016262</td>
+<td>0.7754178</td>
+<td>22.90625</td>
+<td>10.85</td>
+</tr>
+<tr>
+<td>SWEETWATER</td>
+<td>140.816</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>0.9845731</td>
+<td>26.41522</td>
+<td>6.775</td>
+</tr>
+<tr>
+<td>UNIVERSITY</td>
+<td>191.5811</td>
+<td> </td>
+<td> </td>
+<td> </td>
+<td>1</td>
+<td>15.2625</td>
+<td>6.3</td>
+</tr>
+<tr>
+<td>VALLEY CENTER</td>
+<td>297.5078</td>
+<td> </td>
+<td>0.2043479</td>
+<td>6.333333</td>
+<td>0.07517097</td>
+<td>10.64167</td>
+<td>6.233333</td>
+</tr>
+<tr>
+<td>VISTA</td>
+<td>297.5946</td>
+<td>4.316133</td>
+<td>0.2352545</td>
+<td>1.457329</td>
+<td>0.5058241</td>
+<td>8.185714</td>
+<td>8.207143</td>
+</tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>
