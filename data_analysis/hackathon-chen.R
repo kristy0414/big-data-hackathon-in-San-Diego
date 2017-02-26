@@ -47,3 +47,31 @@ text(fit2,use.n=T)
 tree.prp<-prune(fit2,cp=(fit3$cptable[8,1]+fit2$cptable[9,1])/2)
 plot(tree.prp,uniform=T,margin=0.05)
 text(tree.prp,use.n=T)
+
+library("rpart")
+mood<-read.csv("mood.csv",header = T)
+
+my.control<-rpart.control(cp=0,xval=10)
+Male.t<-(mood$Male_Cases/mood$Male_Rate)
+Female.t<-(mood$Female_Cases/mood$Female_Rate)
+white.t<-mood$White_Cases/mood$White_Rate
+black.t<-mood$Black_Cases/mood$Black_Rate
+Hispanic.t<-mood$Hispanic_Cases/mood$Hispanic_Rate
+APIC.t<-mood$Asian_Pacific_Islander_Cases/mood$Asian_Pacific_Islander_Rate
+OREC.t<-mood$Other_Race_Ethnicity_Cases/mood$Other_Race_Ethnicity_Rate
+A1.t<-mood$Age_Group_0_to_14_Cases/mood$Age_Group_0_to_14_Rate
+A2.t<-mood$Age_Group_15_to_24_Cases/mood$Age_Group_15_to_24_Rate
+A3.t<-mood$Age_Group_25_to_44_Cases/mood$Age_Group_25_to_44_Rate
+A4.t<-mood$Age_Group_65Plus_Cases/mood$Age_Group_65Plus_Rate
+fit4<-rpart(Total_Rate~pop2010+UrbanicitySort+SESSort
+            +Male.t+Female.t+white.t+black.t+Hispanic.t+APIC.t+OREC.t
+            +A1.t+A2.t+A3.t+A4.t+percent+Unemployment_rate+p_parkacc,
+            data=mood,control=my.control)
+fit4.cp<-printcp(fit4)
+plot(fit4,uniform = T,margin = 0.05)
+text(fit4,use.n=T)
+
+
+tree.prt<-prune(fit4,cp=(fit3$cptable[14,1]+fit4$cptable[15,1])/2)
+plot(tree.prt,uniform=T,margin=0.02)
+text(tree.prt,use.n=T)
