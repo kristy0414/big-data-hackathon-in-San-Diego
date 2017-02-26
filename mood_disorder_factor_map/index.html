@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <meta charset="UTF-8" />
+	 <meta name="viewport" content="width=device-width, initial-scale=1" />
+	 <title>
+	     Mood Disorder Factor Map
+	 </title>
+	 <!--Leaflet-->
+
+	 <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+	 <script src="lib/leaflet/leaflet.js"></script>
+	 
+	 <script src="data/mood_disorder_factor.geojson"></script>
+     <link rel="stylesheet" href="dist/MarkerCluster.css" />
+	 <link rel="stylesheet" href="dist/MarkerCluster.Default.css" />
+	 
+	 
+	 
+	 
+     
+	 
+	 
+	 <style type="text/css">
+	    #map { width:800px; height:600px; }
+	 </style>
+   </head>
+   <body>
+     <h1>Mood Disorder Factor Map </h1>
+	 <div id="map"></div>
+	 <script>
+	   //Get food afford layer
+	   function getaffordColor(popEst){
+	      if(popEst>0.4){return '#900C3F';}
+		  else if(popEst>0.3){return '#C70039';}
+		  else if(popEst>0.2){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function afford_Style(feature){
+	       return{
+		      fillColor:getaffordColor(feature.properties.food_affor),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var afford_layer;
+	   	function resetaffordHighlight(e) {
+		  afford_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function afford_onEachFeature(feature, layer) {
+		var popupContent = "Region Name: "+feature.properties.NAME+"<br>Age adjustment rate"+feature.properties.Age_Adjust+"<br>Food Affordability: "+feature.properties.food_affor;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetaffordHighlight, click: zoomToFeature})
+	    }
+		
+	   //Get poverty layer
+	   function getpovertyColor(popEst){
+	      if(popEst>20){return '#900C3F';}
+		  else if(popEst>12){return '#C70039';}
+		  else if(popEst>5){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function poverty_Style(feature){
+	       return{
+		      fillColor:getpovertyColor(feature.properties.Poverty),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var poverty_layer;
+	   	function resetpovertyHighlight(e) {
+		  poverty_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function poverty_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adjust+"<br>Poverty Rate:"+feature.properties.Poverty;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetpovertyHighlight, click: zoomToFeature})
+	    }
+
+	   //Get ozone pollution layer
+	   function getozoneColor(popEst){
+	      if(popEst>6){return '#900C3F';}
+		  else if(popEst>3){return '#C70039';}
+		  else if(popEst>1){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function ozone_Style(feature){
+	       return{
+		      fillColor:getozoneColor(feature.properties.ozone_poll),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var ozone_layer;
+	   	function resetozoneHighlight(e) {
+		  ozone_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function ozone_onEachFeature(feature, layer) {
+		var popupContent = "Name: "+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adjust+"<br>Ozone Pollution: "+feature.properties.ozone_poll;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetozoneHighlight, click: zoomToFeature})
+	    }
+
+	   //Get crime rate
+	   function getcrimeColor(popEst){
+	      if(popEst>4){return '#900C3F';}
+		  else if(popEst>3){return '#C70039';}
+		  else if(popEst>1){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function crime_Style(feature){
+	       return{
+		      fillColor:getcrimeColor(feature.properties.crime_rate),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var crime_layer;
+	   	function resetcrimeHighlight(e) {
+		  crime_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function crime_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Crime Rate: "+feature.properties.crime_rate;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetcrimeHighlight, click: zoomToFeature})
+	    }		
+		
+	   //Get unemployment rate
+	   function getunemployColor(popEst){
+	      if(popEst>9){return '#900C3F';}
+		  else if(popEst>6){return '#C70039';}
+		  else if(popEst>3){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function unemploy_Style(feature){
+	       return{
+		      fillColor:getunemployColor(feature.properties.Unemployme),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var unemploy_layer;
+	   	function resetunemployHighlight(e) {
+		  unemploy_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function unemploy_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Unemployment Rate: "+feature.properties.Unemployme;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetunemployHighlight, click: zoomToFeature})
+	    }		
+		
+	   //Get Park Percentage
+	   function getparkColor(popEst){
+	      if(popEst>0.9){return '#900C3F';}
+		  else if(popEst>0.7){return '#C70039';}
+		  else if(popEst>0.5){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function park_Style(feature){
+	       return{
+		      fillColor:getparkColor(feature.properties.Parks),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var park_layer;
+	   	function resetparkHighlight(e) {
+		  park_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function park_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjustment Rate: "+feature.properties.Age_Adjust+"<br>Park Percentage: "+feature.properties.Parks;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: resetparkHighlight, click: zoomToFeature})
+	    }		
+		
+		
+		
+	   
+	   //public functions
+	   	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+		
+
+		//info.update(layer.feature.properties);
+	    }
+
+	   function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	   }
+	   
+	   
+       var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				maxZoom: 15,
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}),
+			latlng = new L.LatLng(33.024247, -116.820837);
+			
+	   var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		   mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+
+
+
+	   var map = new L.Map('map', {center: latlng, zoom: 9, layers: [tiles]});
+	   
+	   var afford_layer=L.geoJson(mood_factor,{style:afford_Style,onEachFeature:afford_onEachFeature}).addTo(map);
+       var ozone_layer=L.geoJson(mood_factor,{style:ozone_Style,onEachFeature:ozone_onEachFeature});
+	   var poverty_layer=L.geoJson(mood_factor,{style:poverty_Style,onEachFeature:poverty_onEachFeature});
+	   var crime_layer=L.geoJson(mood_factor,{style:crime_Style,onEachFeature:crime_onEachFeature});
+       var unemploy_layer=L.geoJson(mood_factor,{style:unemploy_Style,onEachFeature:unemploy_onEachFeature});
+	   var park_layer=L.geoJson(mood_factor,{style:park_Style,onEachFeature:park_onEachFeature});
+	   
+
+	   var baseLayers = {
+		"OpenStreetMap":tiles
+	   };
+
+	   var vaccine_exemption_type = {
+		"Food Affordability": afford_layer,
+		"Ozone Pollution": ozone_layer,
+		"Poverty Rate": poverty_layer,
+		"Crime Rate":crime_layer,
+		"Unemployment Rate":unemploy_layer,
+		"Park Percentage":park_layer
+	   };
+
+
+	   map.addLayer(tiles)
+	   
+	   L.control.layers(vaccine_exemption_type).addTo(map);
+	   
+	   //add legend
+	   var afford_legend=L.control({position:'bottomright'});
+	   afford_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 0.4",
+			 "> 0.3",
+			 "> 0.2",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [0.4000001,0.30000001,0.2000001,0.00001,0];
+		  div.innerHTML='<div><b>Food Affordabilty</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getaffordColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var ozone_legend=L.control({position:'bottomright'});
+	   ozone_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 6",
+			 "> 3",
+			 "> 1",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [6.00001,3.00001,1.00001,0.00001,0];
+		  div.innerHTML='<div><b>Ozone pollution</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getozoneColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var poverty_legend=L.control({position:'bottomright'});
+	   poverty_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 20",
+			 "> 12",
+			 "> 5",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [20.00001,12.00001,5.00001,0.00001,0];
+		  div.innerHTML='<div><b>Poverty Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getpovertyColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var crime_legend=L.control({position:'bottomright'});
+	   crime_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 4",
+			 "> 3",
+			 "> 1",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [4.00001,3.00001,1.00001,0.00001,0];
+		  div.innerHTML='<div><b>Crime Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getcrimeColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var unemploy_legend=L.control({position:'bottomright'});
+	   unemploy_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 9",
+			 "> 6",
+			 "> 3",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [9.00001,6.00001,3.00001,0.00001,0];
+		  div.innerHTML='<div><b>Unemployed Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getunemployColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var park_legend=L.control({position:'bottomright'});
+	   park_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 0.9",
+			 "> 0.7",
+			 "> 0.5",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [0.90001,0.70001,0.50001,0.00001,0];
+		  div.innerHTML='<div><b>Park Percentage</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+getparkColor(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   afford_legend.addTo(map);
+	   currentLegend=afford_legend;
+	   
+	   map.on('baselayerchange',function(eventLayer){
+	     if(eventLayer.name==='Food Affordability'){
+		    map.removeControl(currentLegend)
+			currentLegend=afford_legend;
+			afford_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Ozone Pollution'){
+		    map.removeControl(currentLegend);
+			currentLegend=ozone_legend;
+			ozone_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Poverty Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=poverty_legend;
+			poverty_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Crime Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=crime_legend;
+			crime_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Unemployment Rate'){
+		    map.removeControl(currentLegend);
+			currentLegend=unemploy_legend;
+			unemploy_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Park Percentage'){
+		    map.removeControl(currentLegend);
+			currentLegend=park_legend;
+			park_legend.addTo(map);
+		 }
+	   }
+	   )
+	   
+	   
+	   
+       
+	   
+	   
+	 </script>
+   </body>
+</html>
