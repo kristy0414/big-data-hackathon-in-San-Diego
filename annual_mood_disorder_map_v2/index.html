@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+   <head>
+     <meta charset="UTF-8" />
+	 <meta name="viewport" content="width=device-width, initial-scale=1" />
+	 <title>
+	     Mood Disorder Map (2010-2013)
+	 </title>
+	 <!--Leaflet-->
+
+	 <link rel="stylesheet" href="lib/leaflet/leaflet.css" />
+	 <script src="lib/leaflet/leaflet.js"></script>
+	 
+	 <script src="data/mood.geojson"></script>
+     <link rel="stylesheet" href="dist/MarkerCluster.css" />
+	 <link rel="stylesheet" href="dist/MarkerCluster.Default.css" />
+	 
+	 
+	 
+	 
+     
+	 
+	 
+	 <style type="text/css">
+	    #map { width:800px; height:600px; }
+	 </style>
+   </head>
+   <body>
+     <h1>Mood Disorder Map (2010-2013)</h1>
+	 <div id="map"></div>
+	 <script>
+	   //Get 2010 layer
+	   function get2010Color(popEst){
+	      if(popEst>400){return '#900C3F';}
+		  else if(popEst>300){return '#C70039';}
+		  else if(popEst>200){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function mood_2010_Style(feature){
+	       return{
+		      fillColor:get2010Color(feature.properties.Age_Adjust),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var mood_2010_layer;
+	   	function reset2010Highlight(e) {
+		  mood_2010_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function mood_2010_onEachFeature(feature, layer) {
+		var popupContent = "Region Name: "+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adjust;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: reset2010Highlight, click: zoomToFeature})
+	    }
+		
+	   //Get 2011 layer
+	   function get2011Color(popEst){
+	      if(popEst>400){return '#900C3F';}
+		  else if(popEst>300){return '#C70039';}
+		  else if(popEst>200){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function mood_2011_Style(feature){
+	       return{
+		      fillColor:get2011Color(feature.properties.Age_Adju_1),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var mood_2011_layer;
+	   	function reset2011Highlight(e) {
+		  mood_2011_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function mood_2011_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adju_1;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: reset2011Highlight, click: zoomToFeature})
+	    }
+
+	   //Get 2012 layer
+	   function get2012Color(popEst){
+	      if(popEst>400){return '#900C3F';}
+		  else if(popEst>300){return '#C70039';}
+		  else if(popEst>200){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function mood_2012_Style(feature){
+	       return{
+		      fillColor:get2012Color(feature.properties.Age_Adju_2),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var mood_2012_layer;
+	   	function reset2012Highlight(e) {
+		  mood_2012_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function mood_2012_onEachFeature(feature, layer) {
+		var popupContent = "Name: "+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adju_2;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: reset2012Highlight, click: zoomToFeature})
+	    }
+
+	   //Get 2013 layer
+	   function get2013Color(popEst){
+	      if(popEst>400){return '#900C3F';}
+		  else if(popEst>300){return '#C70039';}
+		  else if(popEst>200){return '#FF5733';}
+		  else if(popEst>0){return '#FFC300';}
+		  else {return '#C0C0C0';}
+	   }
+	   function mood_2013_Style(feature){
+	       return{
+		      fillColor:get2013Color(feature.properties.Age_Adju_3),
+			  weight:2,
+			  opacity:1,
+			  color:'grey',
+			  dashArray:3,
+			  fillOpacity:0.7
+		   }
+	   }
+	    var mood_2013_layer;
+	   	function reset2013Highlight(e) {
+		  mood_2013_layer.resetStyle(e.target);
+		  //info.update();
+	    }
+	    function mood_2013_onEachFeature(feature, layer) {
+		var popupContent = "Name:"+feature.properties.NAME+"<br>Age Adjust Rate: "+feature.properties.Age_Adju_3;
+		layer.bindPopup(popupContent);
+		layer.on({mouseover: highlightFeature, mouseout: reset2013Highlight, click: zoomToFeature})
+	    }		
+		
+
+	   
+	   //public functions
+	   	function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+		
+
+		//info.update(layer.feature.properties);
+	    }
+
+	   function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	   }
+	   
+	   
+       var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+				maxZoom: 15,
+				attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+			}),
+			latlng = new L.LatLng(33.024247, -116.820837);
+			
+	   var mbAttr = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		   mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+
+
+
+	   var map = new L.Map('map', {center: latlng, zoom: 9, layers: [tiles]});
+	   
+	   var mood_2010_layer=L.geoJson(mood_dis,{style:mood_2010_Style,onEachFeature:mood_2010_onEachFeature}).addTo(map);
+       var mood_2011_layer=L.geoJson(mood_dis,{style:mood_2011_Style,onEachFeature:mood_2011_onEachFeature});
+	   var mood_2012_layer=L.geoJson(mood_dis,{style:mood_2012_Style,onEachFeature:mood_2012_onEachFeature});
+	   var mood_2013_layer=L.geoJson(mood_dis,{style:mood_2013_Style,onEachFeature:mood_2013_onEachFeature});
+
+	   
+
+	   var baseLayers = {
+		"OpenStreetMap":tiles
+	   };
+
+	   var vaccine_exemption_type = {
+		"Mood Disorder 2010": mood_2010_layer,
+		"Mood Disorder 2011": mood_2011_layer,
+		"Mood Disorder 2012": mood_2012_layer,
+		"Mood Disorder 2013":mood_2013_layer,
+		
+	   };
+
+
+	   map.addLayer(tiles)
+	   
+	   L.control.layers(vaccine_exemption_type).addTo(map);
+	   
+	   //add legend
+	   var mood_2010_legend=L.control({position:'bottomright'});
+	   mood_2010_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 400",
+			 "> 300",
+			 "> 200",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [400.00001,300.00001,200.00001,0.00001,0.0];
+		  div.innerHTML='<div><b>Age Adjustment Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+get2010Color(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var mood_2011_legend=L.control({position:'bottomright'});
+	   mood_2011_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 400",
+			 "> 300",
+			 "> 200",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [400.00001,300.00001,200.00001,0.00001,0.0];
+		  div.innerHTML='<div><b>Age Adjustment Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+get2011Color(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   var mood_2012_legend=L.control({position:'bottomright'});
+	   mood_2012_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 400",
+			 "> 300",
+			 "> 200",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [400.00001,300.00001,200.00001,0.00001,0.0];
+		  div.innerHTML='<div><b>Age Adjustment Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+get2012Color(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+	   
+	   var mood_2013_legend=L.control({position:'bottomright'});
+	   mood_2013_legend.onAdd=function(map){
+	      var div=L.DomUtil.create('div','legend');
+		  var labels=[
+		     "> 400",
+			 "> 300",
+			 "> 200",
+			 "> 0",
+			 "No data"
+		  ];
+		  var grades = [400.00001,300.00001,200.00001,0.00001,0.0];
+		  div.innerHTML='<div><b>Age Adjustment Rate</b></div>';
+		  for(var i=0;i<grades.length;i++){
+		     div.innerHTML+='<i style="background:'+get2013Color(grades[i])+'">&nbsp;&nbsp;</i>&nbsp;&nbsp;'
+			 +labels[i]+'<br/>';
+		  }
+		  return div;
+	   }
+
+	   
+	   mood_2010_legend.addTo(map);
+	   currentLegend=mood_2010_legend;
+	   
+	   map.on('baselayerchange',function(eventLayer){
+	     if(eventLayer.name==='Mood Disorder 2010'){
+		    map.removeControl(currentLegend)
+			currentLegend=mood_2010_legend;
+			mood_2010_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Mood Disorder 2011'){
+		    map.removeControl(currentLegend);
+			currentLegend=mood_2011_legend;
+			mood_2011_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Mood Disorder 2012'){
+		    map.removeControl(currentLegend);
+			currentLegend=mood_2012_legend;
+			mood_2012_legend.addTo(map);
+		 }
+	     else if(eventLayer.name==='Mood Disorder 2013'){
+		    map.removeControl(currentLegend);
+			currentLegend=mood_2013_legend;
+			mood_2013_legend.addTo(map);
+		 }
+
+	   }
+	   )
+	   
+	   
+	   
+       
+	   
+	   
+	 </script>
+   </body>
+</html>
